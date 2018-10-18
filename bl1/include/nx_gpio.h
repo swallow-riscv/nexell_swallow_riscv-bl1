@@ -143,12 +143,12 @@ union nxpad {
 	struct nxpadi padi;
 };
 
-void GPIOSetAltFunction(const struct nxpadi *pad, int setalt);
-void GPIOSetDrvSt(const struct nxpadi *pad, NX_GPIO_DRVSTRENGTH str);
-void GPIOSetPullup(const struct nxpadi *pad, NX_GPIO_PULL pull);
+void GPIOSetAltFunction(const struct nxpadi pad, int setalt);
+void GPIOSetDrvSt(const struct nxpadi pad, NX_GPIO_DRVSTRENGTH str);
+void GPIOSetPullup(const struct nxpadi pad, NX_GPIO_PULL pull);
 void GPIOReleasePAD(const struct nxpadi *pad);
-void GPIOSetIO(const struct nxpadi *pad, int inout);
-void GPIOSetOutput(const struct nxpadi *pad, int outvalue);
-void setpad(const union nxpad *const ppad, int num, int enable);
+void GPIOSetIO(const struct nxpadi pad, int inout);
+void GPIOSetOutput(const struct nxpadi pad, int outvalue);
+void setpad(const struct nxpadi pad, int enable);
 
 #endif //__NX_GPIO_H__
