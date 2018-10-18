@@ -1432,12 +1432,12 @@ int SDMMCBOOT(SDBOOTSTATUS *pSDXCBootStatus)
 
 void NX_SDPADSetALT(unsigned int PortNum)
 {
-    setpad(sdmmcpad[PortNum], 6, 1);
+//    setpad(sdmmcpad[PortNum], 6, 1);
 }
 
 void NX_SDPADSetGPIO(unsigned int PortNum)
 {
-    setpad(sdmmcpad[PortNum], 6, 0);
+//    setpad(sdmmcpad[PortNum], 6, 0);
 }
 
 //------------------------------------------------------------------------------

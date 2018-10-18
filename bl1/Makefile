@@ -36,11 +36,11 @@ LDFLAGS	=	-static -nostdlib -L ./ -T$(LDS_NAME) \
 SYS_OBJS	=	head.o
 SYS_OBJS	+=	bl1_main.o \
 			iSDBOOT.o \
-			iSPIBOOT.o \
 			nx_gpt.o \
 			nx_lib.o \
 			nx_gpio.o \
 			nx_cpuif_regmap.o
+			#iSPIBOOT.o \
 
 emul = no
 ifeq ($(QEMU), y)

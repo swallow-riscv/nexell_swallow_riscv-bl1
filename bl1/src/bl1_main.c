@@ -64,12 +64,8 @@ unsigned int* bl1main()
 
 #ifdef DEBUG
    serial_init(0); //channel = 0
+   _dprintf("bootloader~start");
    _dprintf("Bl1 Start \n");
-   int i=0;
-   while(1) {
-   i++;
-   _dprintf("%d \n",i);
-   }
 #endif
 
    //Boot mode check and BBL+linux loading

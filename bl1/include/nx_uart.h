@@ -66,7 +66,8 @@
 #define TAT                     0xBC            // Transmit Address Register
 #define DLF                     0xC0            // Divisor Latch Fraction Register
 #define RAR                     0xC4            // Receive Address Register
-#define LCR_EXT                 0xC8            // Line Extended Control Register
+#define TAR                     0xC8            // Transmit Address Register
+#define LCR_EXT                 0xCC            // Line Extended Control Register
 #define CPR                     0xF4            // Component Parameter Register
 #define UCV                     0xF8            // UART Component Version
 #define CTR                     0xFC            // Component Type Register
