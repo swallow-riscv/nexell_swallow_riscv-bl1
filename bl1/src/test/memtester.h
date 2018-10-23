@@ -79,4 +79,7 @@
 /* #define TEST_NARROW_WRITES */
 
 void simple_memtest(void);
-
+int simple_memtest_8bit(void);
+int simple_memtest_16bit(void);
+int simple_memtest_32bit(void);
+int simple_memtest_burst(void);
