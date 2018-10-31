@@ -66,6 +66,8 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate)
 	/* Divisor Latch Access Bit. */
 	mmio_set_32((base + LCR), DLAB);
 
+	mmio_set_32((base + LCR), 0x3);
+
 	/* step xx. calculates an integer at the baud rate */
 	ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
 	ibrd = 108;					// ibrd = 8, 115200bps
@@ -89,7 +91,7 @@ int serial_init(unsigned int channel)
 {
 	volatile unsigned int reg_value = 0;
 	unsigned int g_uart_reg = serial_get_baseaddr(channel);
-	struct nxpadi uart_tx_gpio = { 1, 12, 0, 1 };
+	struct nxpadi uart_tx_gpio = { 1, 12, 3, 1 };
 	unsigned int g_clk_num[2] = {NX_CMU_CLK_APB, NX_CMU_CLK_CLK400};
 
 	/* step xx. set the cmu (source clock) */
@@ -113,9 +115,6 @@ int serial_init(unsigned int channel)
 
 	reg_value = (XFIFOR|RFIFOR|FIFO_ENB);					// Tx, Rx FIFO Reset, FIFO Enable (Rx:0x2 Tx:0x1)
 	mmio_write_32((g_uart_reg + FCR), reg_value);
-
-	reg_value = DATA_LENGTH(0x3);						// Parity Bit: Even, Stop Bit: 1Bit, Data Length: 8Bit
-	mmio_write_32((g_uart_reg + LCR), reg_value);
 
 	return 0;
 }
@@ -144,9 +143,7 @@ void serial_putc(char ch)
 	int i = 0;
 	unsigned int g_uart_reg = serial_get_baseaddr(0);
 	while (!(mmio_read_32(g_uart_reg + USR) & TX_FIFO_NOTFULL));
-	mmio_write_32((g_uart_reg + THR), (unsigned int)ch & 0x1f);
-	for(i=0;i< 100; i++)
-		nx_cpuif_reg_write_one(STOP_SYS_0_CLK40_CLK, 0x1);
+	mmio_write_32((g_uart_reg + THR), (unsigned int)ch);
 }
 
 int serial_is_busy(void)

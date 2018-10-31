@@ -64,8 +64,7 @@ unsigned int* bl1main()
 
 #ifdef DEBUG
    serial_init(0); //channel = 0
-   _dprintf("bootloader~start");
-   _dprintf("Bl1 Start \n");
+   _dprintf("Bl1 Start\r\n");
 #endif
 
    //Boot mode check and BBL+linux loading
@@ -74,17 +73,17 @@ unsigned int* bl1main()
    //reset vector test
 #ifdef VECTOR_TEST
    volatile unsigned int* pCLINT1Reg = (unsigned int*)(0x02000004);
-   _dprintf("CPU1 wake-up\n");
+   _dprintf("CPU1 wake-up\r\n");
    *pCLINT1Reg = 0x1;
    return 0;
 #else
 #ifdef DEBUG
-    _dprintf(">> bl1 boot result = 0x%x <<\n",result);
+    _dprintf(">> bl1 boot result = 0x%x <<\r\n",result);
 #endif
     
     if (result) {
 #ifdef DEBUG
-        _dprintf(">> Launch to 0x%x\n", BASEADDR_DRAM);
+        _dprintf(">> Launch to 0x%x\r\n", BASEADDR_DRAM);
 #endif
         return (unsigned int*)(BASEADDR_DRAM);
     }
