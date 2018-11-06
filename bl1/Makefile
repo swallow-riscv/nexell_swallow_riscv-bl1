@@ -20,7 +20,7 @@ CFLAGS		+= \
 		-march=$(ARCH) \
 		-mabi=$(ABI) \
 		-mcmodel=medany \
-		-O2 -std=gnu11 \
+		-std=gnu11 \
 		-Wall -nostartfiles \
 		-fno-common -DENTROPY=0 \
 		-DNONSMP_HART=0
@@ -35,12 +35,11 @@ LDFLAGS	=	-static -nostdlib -L ./ -T$(LDS_NAME) \
 
 SYS_OBJS	=	head.o
 SYS_OBJS	+=	bl1_main.o \
-			iSDBOOT.o \
-			nx_gpt.o \
 			nx_lib.o \
 			nx_gpio.o \
 			nx_cpuif_regmap.o
-			#iSPIBOOT.o \
+
+SYS_OBJS	+=	iSDBOOT.o
 
 emul = no
 ifeq ($(QEMU), y)
@@ -54,11 +53,14 @@ endif
 ifeq ($(emul), yes)
 	SYS_OBJS	+=	nx_qemu_sim_printf.o
 else
-	SYS_OBJS	+=	nx_swallow_printf.o serial.o
+ifeq ($(DEBUG), y)
+	SYS_OBJS	+=	serial.o
+	SYS_OBJS	+=	nx_swallow_printf.o
+endif
 endif
 
 ifeq ($(MEMTEST),y)
-CFLAGS			+=	-DMEMTEST -DSIMPLE_MEMTEST
+CFLAGS			+=	-DMEMTEST
 SYS_OBJS		+=	memtester.o
 endif
 

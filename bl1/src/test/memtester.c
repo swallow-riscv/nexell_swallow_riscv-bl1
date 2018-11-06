@@ -16,131 +16,186 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 //#include <sysheader.h>
-#include <memtester.h>
-#include <nx_qemu_sim_printf.h>
+#include "memtester.h"
+#include <nx_swallow_printf.h>
+#include <nx_cpuif_regmap.h>
+#include <nx_lib.h>
 
-#define MPTRS unsigned int
+#define BLOCK_LENGTH 512
 
-void simple_memtest(void)
+/* int simple_memtest_8bit(volatile unsigned int rdqdlyval) */
+/* { */
+/* 	volatile unsigned int *start;// = 0x90020000; */
+/* 	volatile unsigned int *end;// = 0x90021400; */
+/* 	volatile unsigned int *sram_start;// = 0x90020000; */
+/* 	volatile unsigned int *sram_end;// = 0x90021400; */
+/* 	volatile unsigned int *ptr, *sram_ptr; */
+/*         volatile unsigned int readVal = 0, sram_readVal = 0; */
+/*         unsigned int loop = 1; */
+
+/* 	start = ((volatile unsigned int *)0x80013200); */
+/*         end   = ((volatile unsigned int *)0x80014200); */
+/* 	sram_start = ((volatile unsigned int *)0x40006000); */
+/*         sram_end   = ((volatile unsigned int *)0x40007000); */
+
+/* 	_dprintf("############## Read to SRAM Start!! ###############\r\n"); */
+/*         ptr = start; */
+/*         sram_ptr = sram_start; */
+/*         while (ptr < end) { */
+/* 	        *sram_ptr = *ptr; */
+/*                 _dprintf("W: writeVal = 0x%08x, sram_addr = 0x%08x\r\n", *sram_ptr, sram_ptr); */
+/*                 sram_ptr++; */
+/*                 ptr++; */
+/*         } */
+
+
+/*         _dprintf("read test\r\n"); */
+/*         udelay(1000000); */
+/*         for (int i = 0; i < loop; i++) { */
+/* 	        ptr = start; */
+/* 	        sram_ptr = sram_start; */
+
+/*                 _dprintf("\r\nCompare 8bit Try %01x \r\n",i+1); */
+        
+/* 	        while (ptr < end) { */
+/* 	                readVal = (unsigned int)(*ptr); */
+/* 	                sram_readVal = (unsigned int)(*sram_ptr); */
+/* 	                _dprintf("R: dram_addr = 0x%08x, dram_val = 0x%08x\r\n", ptr, (unsigned int)(*ptr)); */
+/* 	                _dprintf("R: sram_addr = 0x%08x, sram_val = 0x%08x\r\n\r\n", sram_ptr, (unsigned int)(*sram_ptr)); */
+	
+/* 	                if (readVal != sram_readVal) { */
+/* 	                      	_dprintf("Read test Fail1!\r\n"); */
+/* 	                        _dprintf("dram_addr = 0x%08x\r\n",ptr); */
+/* 	                        _dprintf("sram_addr = 0x%08x\r\n",sram_ptr); */
+/* 	                        _dprintf("dram_readVal = 0x%08x\r\n",(unsigned int)*ptr); */
+/* 	                        _dprintf("sram_readVal = 0x%08x\r\n",(unsigned int)*sram_ptr); */
+/* 	                        _dprintf("=================================================\r\n"); */
+/*                                 return 0; */
+/* 	              	} */
+/* 	                ptr++; */
+/* 	                sram_ptr++; */
+/* 	        } */
+/*                 udelay(64000); //64ms */
+/* 	} */
+        
+/*         _dprintf("=================================================\r\n"); */
+/* 	_dprintf("Done!   \r\n"); */
+/*         return 1; */
+/* } */
+
+int simple_memtest_8bit(void)
 {
-	unsigned int* start, *end, *ptr;
-	unsigned int  size;
+	volatile unsigned int *start;// = 0x90020000;
+	volatile unsigned int *end;// = 0x90021400;
+	volatile unsigned int *ptr;
+        volatile unsigned int loop = 1;
+        volatile unsigned int readVal = 0;
+        volatile unsigned int testVal = 0;
+        unsigned int testValStart = 0xa5a5a500;
 
-	start = ((unsigned int *)0x80200000);
-        end   = ((unsigned int *)0x80202000);
-	/* end   = ((unsigned int *)(0x80000000 */
-        /*                           + (g_ddr3_info.sdram_size * 1024 * 1024 - 1)));	//MB -> Byte */
-	ptr = start;
-	size = (unsigned int)(end - start) * sizeof(unsigned int);
+	start = ((volatile unsigned int *)0x87000000);
+        end   = ((volatile unsigned int *)0x87000100);
 
-	_dprintf("############## Simple Memory Test Start!! ###############\r\n");
-	_dprintf("Start: 0x%x, End: 0x%x, Size: 0x%x \r\n",
-		start, end, size);
+        for (int i = 0; i < loop; i++) {
+                ptr = start;
+                testVal = testValStart;
 
-	/* step xx. data write */
-	_dprintf("Read/Write : \n");
-	_dprintf("Write  \n");
-	while (ptr < end) {
-		*ptr = (unsigned int)((MPTRS)ptr);
-#if 0
-		if (((unsigned int)((MPTRS)ptr) & 0x3FFFFFL) == 0)
-			_dprintf("0x%x:\r\n", ptr);
-#endif
-#if 0
-		if (((unsigned int)((MPTRS)ptr) % PROGRESSOFTEN) == 0) {
-			_dprintf("\b");
-			_dprintf("%c", progress[++j%  PROGRESSLEN]);
-		}
-#endif
-		ptr++;
-	}
-	_dprintf("\b\b\b\b\b\b\b\n");
+                //write
+                while (ptr < end) {
+                        *ptr = (unsigned int)(testVal);
+                        testVal++;
+                        if ((testVal & 0x100) >> 8) {
+	                        testVal = 0;
+                        }
+                        ptr++;
+                }
+        }
 
-	_dprintf("Compare  \n");
-	ptr = start;
-	while (ptr < end) {
-#if 0
-		if (*ptr != (unsigned int)((MPTRS)ptr))
-			_dprintf("0x%08X: %16X\r\n", (unsigned int)((MPTRS)ptr), *ptr);
-#else
-		unsigned int data0 = *ptr, data1 = (unsigned int)((MPTRS)ptr);
-		unsigned int i = 0;
-
-		for (i = 0; i < 32; i++) {
-			data0 &= 1UL << i;
-			data1 &= 1UL << i;
-
-			if (data0 != data1) {
-//				_dprintf("[%dbit] 0x%x: %x\r\n", i,
-//				(unsigned int)((MPTRS)ptr), *ptr);
-				_dprintf("--------------------------------------"
-						"\r\n");
-				_dprintf("[%dbit] 0x%x: %x(0x%x: %x)\r\n",
-						i, data1, data0, (unsigned int)((MPTRS)ptr),
-						*ptr);
-				_dprintf("--------------------------------------"
-						"\r\n");
-//				mask_bit |= 1UL << i;
-			}
-#if 0
-			if ( (mask_bit != 0) && (i == 31) ) {
-				_dprintf("[%Xbit] 0x%x: %x(0x%x: %x)\r\n",
-						mask_bit, data1, data0, (unsigned int)((MPTRS)ptr), *ptr);
-			}
-#endif
-		}
-
-		ptr++;
-#endif
-
-#if 0
-		if ((((MPTRS)ptr) & 0xFFFFFL) == 0)
-			_dprintf("0x%x:\r\n", ptr);
-#endif
-	}
-	_dprintf("\b\b\b\b\b\b\b\b\b\n");
+        __asm__ __volatile__ ("fence" : : : "memory");
+ read:
+        //udelay(3000000);
+        for (int i = 0; i < loop; i++) {
+                ptr = start;
+                testVal = testValStart;
+                while (ptr < end) {
+                        readVal = (unsigned int)(*ptr);
+                        if (readVal != testVal) {
+                                _dprintf("R: addr = 0x%08x, correctVal = 0x%02x, ptrVal = 0x%02x\r\n",ptr, testVal, readVal);
+                                /* return 0; */
+                	}
+                        testVal++;
+                        if ((testVal & 0x100) >> 8) {
+                                testVal = 0;
+                        }
+                        ptr++;
+                }
+        }
 	_dprintf("Done!   \r\n");
-
-	/* step xx. bit shift test */
-	_dprintf("Bit Shift  : \n");
-	_dprintf("Write  \n");
-	ptr = start;
-	while (ptr < end) {
-		*ptr = (1UL << ((((MPTRS)ptr) & 0x1F << 2) >> 2));
-		ptr++;
-	}
-	_dprintf("\b\b\b\b\b\b\b\n");
-
-	_dprintf("Compare  \n");
-	ptr = start;
-	while (ptr < end) {
-		if (*ptr != (1UL << ((((MPTRS)ptr) & 0x1F << 2) >> 2)))
-			_dprintf("0x%x : 0x%x\r\n", ptr, *ptr);
-		ptr++;
-	}
-	_dprintf("\b\b\b\b\b\b\b\b\b\n");
-	_dprintf("Done!   \r\n");
-
-	/* step xx. reserve bit test */
-	_dprintf("Reverse Bit: \n");
-	_dprintf("Write  \n");
-	ptr = start;
-	while (ptr < end) {
-		*ptr = ~(1UL << ((((MPTRS)ptr) & 0x1F << 2) >> 2));
-		ptr++;
-	}
-	_dprintf("\b\b\b\b\b\b\b\n");
-
-	_dprintf("Compare  \n");
-	ptr = start;
-	while (ptr < end) {
-		if (*ptr != ~(1UL << ((((MPTRS)ptr) & 0x1F << 2) >> 2)))
-			_dprintf("0x%x : 0x%x\r\n", ptr, *ptr);
-		ptr++;
-	}
-	_dprintf("\b\b\b\b\b\b\b\b\b\n");
-	_dprintf("Done!   \r\n");
-
-	_dprintf("############## Simple Memory Test Done!!! ###############\r\n");
+        return 1;
 }
 
+
+int simple_memtest_32bit(void)
+{
+	volatile unsigned int *start;// = 0x90020000;
+	volatile unsigned int *end;// = 0x90021400;
+	volatile unsigned int *ptr;
+        volatile unsigned int loop = 1;
+        volatile unsigned int readVal = 0;
+        volatile unsigned int testVal = 0;
+        volatile unsigned int testValStart = 0xa0a0a0a0;
+
+	start = ((volatile unsigned int *)0x87020000);
+        end   = ((volatile unsigned int *)0x87020200);
+
+	_dprintf("############## Simple Memory 8 Bit Test Start!! ###############\r\n");
+        testVal = testValStart;
+        for (int i = 0; i < loop; i++) {
+                ptr = start;
+                _dprintf("Write 8 bit \r\n");
+                while (ptr < end) {
+                        _dprintf("W: addr = 0x%08x, writeVal = 0x%08x\r\n",ptr, testVal);
+                        *ptr = (unsigned int)(testVal);
+                        /* testVal++; */
+                        /* if ((testVal & 0x100) >> 8) { */
+	                /*         testVal = 0; */
+                        /* } */
+
+                        testVal = ~testVal;
+                        ptr++;// += 0x10;
+                }
+        }
+        _dprintf("read test\r\n");
+        udelay(1000000);
+
+        for (int i = 0; i < loop; i++) {
+                _dprintf("\r\nCompare 8bit Try %01x \r\n",i+1);
+                ptr = start;
+                testVal = testValStart;
+                while (ptr < end) {
+                        readVal = (unsigned int)(*ptr);
+                        /* _dprintf("R: addr = 0x%08x, correctVal = 0x%08x, ptrVal = 0x%08x\r\n",ptr, testVal, readVal); */
+                        if (readVal != testVal) {
+                        	/* _dprintf("Read/Write 8 bit test Fail1!\r\n"); */
+                                /* _dprintf("Address = 0x%08x\r\n",ptr); */
+                                /* _dprintf("readVal-1 = 0x%08x\r\n",(unsigned int)*ptr); */
+                                /* _dprintf("readVal = 0x%08x\r\n",(unsigned int)*ptr); */
+                                /* _dprintf("readVal+1 = 0x%08x\r\n",(unsigned int)*ptr); */
+	                        _dprintf("Fail : Addr=0x%08x, correct_value=0x%08x, invalid_value=0x%08x\r\n", ptr, testVal, readVal);
+                                return 0;
+                	}
+                        testVal = ~testVal;
+                        /* testVal++; */
+                        /* if ((testVal & 0x100) >> 8) { */
+                        /*         testVal = 0; */
+                        /* } */
+                        ptr++;// += 0x10;
+                }
+        }
+        _dprintf("=================================================\r\n");
+        _dprintf("=================================================\r\n");
+	_dprintf("MemTest PASS!   \r\n");
+        _dprintf("=================================================\r\n");
+        _dprintf("=================================================\r\n");
+        return 1;
+}

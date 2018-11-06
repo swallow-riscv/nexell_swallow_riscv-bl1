@@ -34,7 +34,7 @@
 #endif
 
 #define DRAM_ADDR _AC(0x80000000,UL)
-#define DRAM_SIZE _AC(0x40000000,UL) //64KB
+#define DRAM_SIZE _AC(0x8000000,UL) //128MB
 
 #define USBD_VID		0x2375
 #define USBD_PID		0x0322

@@ -23,7 +23,7 @@ DEBUG_GDB               = n
 QEMU                    = n
 SIM                     = n
 
-MEMTEST                 = n
+MEMTEST                 = y
 VECTOR_TEST             = n
 
 CROSS_TOOL_TOP		=
@@ -65,7 +65,7 @@ RANLIB 			= $(CROSS_TOOL)ranlib
 GCC_LIB			= $(shell $(CC) -print-libgcc-file-name)
 
 ifeq ($(DEBUG), y)
-CFLAGS			= -DNX_DEBUG -DDEBUG -DNX_RELEASE -O0
+CFLAGS			= -DDEBUG -O2
 Q			= @
 else
 CFLAGS			= -DNX_RELEASE -Os
