@@ -15,14 +15,14 @@
 #define __SERIAL_H__
 
 /* Function Define */
- void serial_set_baudrate (int channel, int uclk, int baud_rate);
- int serial_init(unsigned int channel);
+void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int type);
+int serial_init(unsigned int channel, unsigned int type);
 
-char serial_getc(void);
+/* char serial_getc(void); */
 void serial_putc(char ch);
 
- int serial_is_uart_tx_done(void);
- int serial_is_tx_empty(void);
- int serial_is_busy(void);
+/* int serial_is_uart_tx_done(void); */
+/* int serial_is_tx_empty(void); */
+/* int serial_is_busy(void); */
 
 #endif	//#ifndef __SERIAL_H__

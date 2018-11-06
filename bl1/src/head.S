@@ -9,12 +9,10 @@ bl1start:
 
         call bl1main
 
-        li t0, 0
-        addi t0, a0, 0
-        
-        fence.i
+        li s3, 0
+        addi s3, a0, 0
 
-	jr t0
+        jr s3
 
 
 stop_and_go:
