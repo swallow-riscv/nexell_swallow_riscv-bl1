@@ -11,73 +11,53 @@
  * distribution. In addition to the author (person in charge), the modifier
  * is responsible for the modification.
  */
-#include <nx_swallow.h>
+//#include <nx_swallow.h>
 #include <nx_uart.h>
 #include <nx_gpio.h>
 #include <serial.h>
 #include <nx_clock.h>
 #include <nx_chip_iomux.h>
+#include <nx_swallow_platform.h>
 
-#define CONFIG_REQ_UART_SRC_FREQ		(200000000)
+#define CONFIG_DEFAULT_REQ_UART_SRC_FREQ	(200000000)
 #define CONFIG_REQ_UCLK_FREQ			(100000000)			// 100Mhz
 #define CONFIG_SERIAL_BAUDRATE			(115200)
 
-static union nxpad g_uart_pad[2][2] = {
-	{ {PADINDEX_OF_UART0_TXD}, {PADINDEX_OF_UART0_RXD} },
-	{ {PADINDEX_OF_UART1_TXD}, {PADINDEX_OF_UART1_RXD} },
-};
-
-static int serial_get_baseaddr(unsigned int channel)
-{
-     return (PHY_BASEADDR_UART0_MODULE);
-}
-
-/* static int get_uart_source_clk(void) */
-/* { */
-/* 	return cmu_get_rate(g_clk_num[1]); */
-/* } */
-
-/* static int set_uclk_source(int freq) */
-/* { */
-/* 	cmu_set_rate(g_clk_num[0], CONFIG_REQ_UART_SRC_FREQ); */
-/* 	cmu_set_rate(g_clk_num[1], freq); */
-
-/* 	return 0; */
-/* } */
-
-/* static int set_uclk_enb(int enb) */
-/* { */
-/* 	cmu_srcoff_enable(g_clk_num[0], FALSE); */
-/* 	cmu_srcoff_enable(g_clk_num[1], FALSE); */
-/* //	cmu_clk_enable(g_clk_num[0], enb); */
-/* 	cmu_clk_enable(g_clk_num[1], enb); */
-
-/* 	return 0; */
-/* } */
-
-void serial_set_baudrate (int channel, int uclk, int baud_rate)
+void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int type)
 {
 	volatile unsigned int base;
 
 	int ibrd, fbrd;
 
-	base = serial_get_baseaddr(channel);
+	base = (volatile unsigned int)(PHY_BASEADDR_UART0_MODULE);
 
 	/* Divisor Latch Access Bit. */
 	mmio_set_32((base + LCR), DLAB);
-
-	mmio_set_32((base + LCR), 0x3);
+        mmio_set_32((base + LCR), 3);
 
 	/* step xx. calculates an integer at the baud rate */
-	ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
-	ibrd = 108;					// ibrd = 8, 115200bps
+	//ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
+        if (type == 200) //200Mhz
+                ibrd = 108;					// ibrd = 8, 115200bps
+        else if (type == 100) //100Mhz
+	        ibrd = 54;
+        else if (type == 50) //50Mhz
+	        ibrd = 27;
+        else //150Mhz
+	        ibrd = 81;
 
 	/* step xx. calculates an fractional at the baud rate */
-	fbrd = ((uclk % ((((baud_rate/1) * 16) + 32) * 64))			\
-					/ (baud_rate / 1) * 16);		// fbrd = 0,
-	fbrd = 8;
+	//fbrd = ((uclk % ((((baud_rate/1) * 16) + 32) * 64)) / (baud_rate / 1) * 16);		// fbrd = 0,
+        if (type == 200) //200MHz
+	        fbrd = 8;
+        else if (type == 100) //100MHz
+	        fbrd = 3;
+        else if (type == 50) //50MHz
+	        fbrd = 5;
+        else //150Mhz
+        	fbrd = 4;
 
-	mmio_write_32((base + DLH), ((ibrd >> 8) & 0xFF));			// Divider Latch High 8bit
+        //mmio_write_32((base + DLH), ((ibrd >> 8) & 0xFF));			// Divider Latch High 8bit
 	mmio_write_32((base + DLL), ((ibrd >> 0) & 0xFF));			// Divider Latch Low 8bit
 
 	// DLF - After confirming the number of bits in the field, write it down.
@@ -87,12 +67,12 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate)
 	mmio_clear_32((base + LCR), DLAB);
 }
 
-int serial_init(unsigned int channel)
+int serial_init(unsigned int channel, unsigned int type)
 {
 	volatile unsigned int reg_value = 0;
-	unsigned int g_uart_reg = serial_get_baseaddr(channel);
-	struct nxpadi uart_tx_gpio = { 1, 12, 3, 1 };
-	unsigned int g_clk_num[2] = {NX_CMU_CLK_APB, NX_CMU_CLK_CLK400};
+	unsigned int g_uart_reg = PHY_BASEADDR_UART0_MODULE;
+	struct nxpadi uart_tx_gpio = { 1, 12, 0, 1 };
+        //	unsigned int g_clk_num[2] = {NX_CMU_CLK_APB, NX_CMU_CLK_CLK400};
 
 	/* step xx. set the cmu (source clock) */
         //	set_uclk_source(CONFIG_REQ_UCLK_FREQ);
@@ -101,65 +81,30 @@ int serial_init(unsigned int channel)
         //	set_uclk_enb(TRUE);
 
 	/* step xx. calculates an integer at the baud rate */
-	serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ,
-			CONFIG_SERIAL_BAUDRATE);
+	serial_set_baudrate(channel, CONFIG_DEFAULT_REQ_UART_SRC_FREQ, CONFIG_SERIAL_BAUDRATE, type);
 
 	/* step xx. change the (tx, rx)gpio-alternative function */
-	setpad(uart_tx_gpio, 1);
-
+	//setpad(g_uart_pad[channel][0].padi, 1);
+        setpad(uart_tx_gpio, 1, PHY_BASEADDR_GPIO3_MODULE);
+   
 	/* step xx. set the serial (:uart) */
 #if 0
 	reg_value = (XMIT_FIFO_RESET|RCVR_FIFO_RESET|UART_RESET);		// Software - Tx, Rx FIFO Reset, Uart Reset
 	mmio_write_32((g_uart_reg + SRR), reg_value);
 #endif
 
-	reg_value = (XFIFOR|RFIFOR|FIFO_ENB);					// Tx, Rx FIFO Reset, FIFO Enable (Rx:0x2 Tx:0x1)
+        reg_value = (XFIFOR|RFIFOR|FIFO_ENB);					// Tx, Rx FIFO Reset, FIFO Enable (Rx:0x2 Tx:0x1)
 	mmio_write_32((g_uart_reg + FCR), reg_value);
 
+	reg_value = DATA_LENGTH(0x3);						// Parity Bit: Even, Stop Bit: 1Bit, Data Length: 8Bit
+	mmio_write_32((g_uart_reg + LCR), reg_value);
+
 	return 0;
-}
-
-int serial_is_tx_empty(void)
-{
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
-	return (int)((mmio_read_32(g_uart_reg + USR) & TX_FIFO_NOTEMPTY));
-}
-
-int serial_is_rx_empty(void)
-{
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
-	return (int)(!(mmio_read_32(g_uart_reg + USR) & RX_FIFO_NOTEMPTY));
-}
-
-char serial_getc(void)
-{
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
-	while (!(mmio_read_32(g_uart_reg + USR) & RX_FIFO_NOTEMPTY));
-	return (char)mmio_read_32(g_uart_reg + RBR);
 }
 
 void serial_putc(char ch)
 {
-	int i = 0;
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
+	unsigned int g_uart_reg = PHY_BASEADDR_UART0_MODULE;
 	while (!(mmio_read_32(g_uart_reg + USR) & TX_FIFO_NOTFULL));
-	mmio_write_32((g_uart_reg + THR), (unsigned int)ch);
-}
-
-int serial_is_busy(void)
-{
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
-	return (int)(mmio_read_32(g_uart_reg + USR) & UART_BUSY);
-}
-
-int serial_is_uart_tx_done(void)
-{
-	unsigned int g_uart_reg = serial_get_baseaddr(0);
-	int tx_empty = (int)(!(mmio_read_32(g_uart_reg + USR) & TX_FIFO_NOTEMPTY));
-	int busy = (int)(mmio_read_32(g_uart_reg + USR) & UART_BUSY);
-
-	if (tx_empty && !busy)
-		return 1;
-
-	return 0;
+        mmio_write_32((g_uart_reg + THR), (unsigned int)ch);
 }

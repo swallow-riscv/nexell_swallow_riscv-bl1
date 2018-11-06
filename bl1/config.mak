@@ -17,8 +17,9 @@
 ###########################################################################
 # Build Environment
 ###########################################################################
+EARLY_PRINT             = y
 DEBUG			= y
-DEBUG_GDB               = n
+DEBUG_SDBOOT            = n
 
 QEMU                    = n
 SIM                     = n
@@ -65,10 +66,10 @@ RANLIB 			= $(CROSS_TOOL)ranlib
 GCC_LIB			= $(shell $(CC) -print-libgcc-file-name)
 
 ifeq ($(DEBUG), y)
-CFLAGS			= -DNX_DEBUG -DDEBUG -DNX_RELEASE -O0
+CFLAGS			= -DDEBUG -O2
 Q			= @
 else
-CFLAGS			= -DNX_RELEASE -Os
+CFLAGS			= -DNX_RELEASE -O2
 Q			= @
 endif
 
