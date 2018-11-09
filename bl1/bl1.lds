@@ -1,46 +1,111 @@
-OUTPUT_ARCH("riscv")
-ENTRY(bl1start)
+OUTPUT_ARCH( "riscv" )
+
+ENTRY( bl1start )
 
 SECTIONS
 {
-        . = 0x40000200;
-        . = ALIGN(4);
-        .text :
-        {
-                obj/head.o   (.text)
-                obj/bl1_main.o (.text)
-                obj/nx_*.o (.text)
-                obj/iS*.o (.text)
-                obj/serial.o (.text)
-                *(.init.text)
-                *(.init.data)
-                *(.init.code)
-                *(.text)
-        }
 
-        . = ALIGN(4);
-        .rodata : { *(.rodata*) }
+  /*--------------------------------------------------------------------*/
+  /* Code and read-only segment                                         */
+  /*--------------------------------------------------------------------*/
 
-        . = ALIGN(4);
-        .data : { *(.data*) }
+  /* Begining of code and text segment */
+  . = 0x40000200;
+  _ftext = .;
+  PROVIDE( eprol = . );
 
-        . = ALIGN(4);
-        .got : { *(.got) }
+  .text :
+  {
+    *(.text.init)
+  }
 
-        _end = .;
+  /* text: Program code section */
+  .text :
+  {
+    *(.text)
+    *(.text.*)
+    *(.gnu.linkonce.t.*)
+  }
 
-        __bss_start__ = .;
-        .bss_start (OVERLAY) : {
-                KEEP(*(.__bss_start));
-                __bss_base = .;
-        }
-        .bss __bss_base (OVERLAY) : {
-                *(.bss*)
-                . = ALIGN(4);
-                __bss_limit = .;
-        }
-        .bss_end __bss_limit (OVERLAY) : {
-                KEEP(*(.__bss_end));
-        }
-        __bss_end__ = .;
+  /* rodata: Read-only data */
+  .rodata :
+  {
+    *(.rdata)
+    *(.rodata)
+    *(.rodata.*)
+    *(.gnu.linkonce.r.*)
+  }
+
+  /* End of code and read-only segment */
+  PROVIDE( etext = . );
+  _etext = .;
+
+  /*--------------------------------------------------------------------*/
+  /* HTIF, isolated onto separate page                                  */
+  /*--------------------------------------------------------------------*/
+  . = ALIGN(0x1000);
+  .htif :
+  {
+    PROVIDE( __htif_base = .);
+    *(.htif)
+  }
+  . = ALIGN(0x1000);
+
+  /*--------------------------------------------------------------------*/
+  /* Initialized data segment                                           */
+  /*--------------------------------------------------------------------*/
+
+  /* Start of initialized data segment */
+  . = ALIGN(16);
+   _fdata = .;
+
+  /* data: Writable data */
+  .data : 
+  {
+    *(.data)
+    *(.data.*)
+    *(.srodata*)
+    *(.gnu.linkonce.d.*)
+    *(.comment)
+  }
+
+  /* End of initialized data segment */
+  . = ALIGN(4);
+  PROVIDE( edata = . );
+  _edata = .;
+
+  /*--------------------------------------------------------------------*/
+  /* Uninitialized data segment                                         */
+  /*--------------------------------------------------------------------*/
+
+  /* Start of uninitialized data segment */
+  . = .;
+  _fbss = .;
+
+  /* sbss: Uninitialized writeable small data section */
+  . = .;
+
+  /* bss: Uninitialized writeable data section */
+  . = .;
+  _bss_start = .;
+  .bss :
+  {
+    *(.bss)
+    *(.bss.*)
+    *(.sbss*)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+  }
+
+  .sbi :
+  {
+    *(.sbi)
+  }
+
+  .payload :
+  {
+    *(.payload)
+  }
+
+  _end = .;
 }

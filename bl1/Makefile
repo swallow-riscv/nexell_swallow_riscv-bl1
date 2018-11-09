@@ -53,9 +53,7 @@ endif
 ifeq ($(emul), yes)
 	SYS_OBJS	+=	nx_qemu_sim_printf.o
 else
-ifeq ($(DEBUG), y)
 	SYS_OBJS	+=	nx_swallow_printf.o
-endif
 endif
 
 
