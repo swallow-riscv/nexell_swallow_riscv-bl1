@@ -18,7 +18,7 @@
 # Build Environment
 ###########################################################################
 EARLY_PRINT             = y
-DEBUG			= y
+DEBUG			= n
 DEBUG_SDBOOT            = n
 
 QEMU                    = n

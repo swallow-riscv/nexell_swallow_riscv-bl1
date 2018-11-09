@@ -25,9 +25,7 @@
 #ifdef SOC_SIM
 #include <nx_qemu_sim_printf.h>
 #else
-#ifdef DEBUG
 #include <nx_swallow_printf.h>
-#endif
 #ifdef EARLY_PRINT
 #include <serial.h>
 #endif
@@ -55,7 +53,7 @@ unsigned long int bl1main()
     unsigned int nRUN_CHANGE = 0x1;
 
 #ifdef SOC_SIM
-    _dprintf("bl1 enter---\n");
+    _dprintf("bl1 enter SOC simulation mode\n");
 #endif
 
 #if defined(EARLY_PRINT)
@@ -184,20 +182,6 @@ unsigned long int bl1main()
 
 #ifdef DEBUG
     _dprintf("\r\n");
-
-    // clear mcause
-    _dprintf("mcause %d\r\n", read_csr(mcause));
-    write_csr(mcause, 0);
-    _dprintf("mcause %d\r\n", read_csr(mcause));
-
-    _dprintf("mscratch %d\r\n", read_csr(mscratch));
-    write_csr(mscratch, 0);
-    _dprintf("mscratch %d\r\n", read_csr(mscratch));
-
-    _dprintf("mip %d\r\n", read_csr(mip));
-    write_csr(mip, 0);
-    _dprintf("mip %d\r\n", read_csr(mip));
-
     _dprintf("DDR Clock Speed = %u\r\n", CLK_SPEED);
     _dprintf("bl1 enter--- serial type 2\r\n");
     _dprintf("DDR_TIMING_0_TRAS      = 0x%08x\r\n",DDR_TIMING_0_TRAS     );
@@ -299,10 +283,13 @@ unsigned long int bl1main()
 #endif
 
 
-#if defined(DEBUG)
-    //serial_init(0, CLK_SPEED); //channel = 0
-   _dprintf("bootloader~start\r\n");
-   _dprintf("Bl1 Start \r\n");
+#if defined(EARLY_PRINT)
+    _dprintf("\r\n\r\n---------------------------------\r\n");
+    _dprintf("---------------------------------\r\n");
+    _dprintf("-----  NEXELL 2nd boot start ----\r\n");
+    _dprintf("---------------------------------\r\n");
+    _dprintf("---------------------------------\r\n");
+    _dprintf(" please wait ...\r\n");
 #endif
 
 
@@ -337,6 +324,13 @@ unsigned long int bl1main()
     _dprintf(">> bl1 boot result = 0x%x <<\r\n",result);
 #endif
 
+
+#define write_csr(reg, val) ({ asm volatile ("csrw " #reg ", %0" :: "rK"(val)); })
+
+    write_csr(mscratch, 0);
+    write_csr(mcause, 0);
+    write_csr(mip, 0);
+
     if (result) {
 #ifdef DEBUG
         /* unsigned int* temp = (unsigned int*)(BASEADDR_DRAM); */
@@ -346,23 +340,10 @@ unsigned long int bl1main()
         /*         temp++; */
         /* } */
         /* _dprintf("\r\n"); */
-
-        // clear mcause
-        _dprintf("mcause %d\r\n", read_csr(mcause));
-        write_csr(mcause, 0);
-        _dprintf("mcause %d\r\n", read_csr(mcause));
-
-        _dprintf("mscratch %d\r\n", read_csr(mscratch));
-        write_csr(mscratch, 0);
-        _dprintf("mscratch %d\r\n", read_csr(mscratch));
-
-        _dprintf("medeleg %d\r\n", read_csr(medeleg));
-        _dprintf("mideleg %d\r\n", read_csr(mideleg));
-
         _dprintf(">> Launch to 0x%x\r\n\r\n", (unsigned long int)BASEADDR_DRAM); //0x40006000);
 #endif
-
         udelay(1000);
+
         return BASEADDR_DRAM;
     }
 #endif //VECTOR_TEST
