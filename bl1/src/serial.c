@@ -72,6 +72,7 @@ int serial_init(unsigned int channel, unsigned int type)
 	volatile unsigned int reg_value = 0;
 	unsigned int g_uart_reg = PHY_BASEADDR_UART0_MODULE;
 	struct nxpadi uart_tx_gpio = { 1, 12, 0, 1 };
+	struct nxpadi uart_rx_gpio = { 1, 13, 0, 1 };
         //	unsigned int g_clk_num[2] = {NX_CMU_CLK_APB, NX_CMU_CLK_CLK400};
 
 	/* step xx. set the cmu (source clock) */
@@ -86,7 +87,8 @@ int serial_init(unsigned int channel, unsigned int type)
 	/* step xx. change the (tx, rx)gpio-alternative function */
 	//setpad(g_uart_pad[channel][0].padi, 1);
         setpad(uart_tx_gpio, 1, PHY_BASEADDR_GPIO3_MODULE);
-   
+        setpad(uart_rx_gpio, 1, PHY_BASEADDR_GPIO3_MODULE);
+
 	/* step xx. set the serial (:uart) */
 #if 0
 	reg_value = (XMIT_FIFO_RESET|RCVR_FIFO_RESET|UART_RESET);		// Software - Tx, Rx FIFO Reset, Uart Reset

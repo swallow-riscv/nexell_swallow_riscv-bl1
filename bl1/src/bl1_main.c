@@ -184,7 +184,21 @@ unsigned long int bl1main()
 
 #ifdef DEBUG
     _dprintf("\r\n");
-    _dprintf("DDR Clock Speed = %u\r\n", CLK_SPEED);    
+
+    // clear mcause
+    _dprintf("mcause %d\r\n", read_csr(mcause));
+    write_csr(mcause, 0);
+    _dprintf("mcause %d\r\n", read_csr(mcause));
+
+    _dprintf("mscratch %d\r\n", read_csr(mscratch));
+    write_csr(mscratch, 0);
+    _dprintf("mscratch %d\r\n", read_csr(mscratch));
+
+    _dprintf("mip %d\r\n", read_csr(mip));
+    write_csr(mip, 0);
+    _dprintf("mip %d\r\n", read_csr(mip));
+
+    _dprintf("DDR Clock Speed = %u\r\n", CLK_SPEED);
     _dprintf("bl1 enter--- serial type 2\r\n");
     _dprintf("DDR_TIMING_0_TRAS      = 0x%08x\r\n",DDR_TIMING_0_TRAS     );
     _dprintf("DDR_TIMING_0_TRFC      = 0x%08x\r\n",DDR_TIMING_0_TRFC     );
@@ -332,6 +346,19 @@ unsigned long int bl1main()
         /*         temp++; */
         /* } */
         /* _dprintf("\r\n"); */
+
+        // clear mcause
+        _dprintf("mcause %d\r\n", read_csr(mcause));
+        write_csr(mcause, 0);
+        _dprintf("mcause %d\r\n", read_csr(mcause));
+
+        _dprintf("mscratch %d\r\n", read_csr(mscratch));
+        write_csr(mscratch, 0);
+        _dprintf("mscratch %d\r\n", read_csr(mscratch));
+
+        _dprintf("medeleg %d\r\n", read_csr(medeleg));
+        _dprintf("mideleg %d\r\n", read_csr(mideleg));
+
         _dprintf(">> Launch to 0x%x\r\n\r\n", (unsigned long int)BASEADDR_DRAM); //0x40006000);
 #endif
 
@@ -346,4 +373,3 @@ unsigned long int bl1main()
     while(1);
     return 0;
 }
-
