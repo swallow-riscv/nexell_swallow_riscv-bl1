@@ -55,7 +55,7 @@ long unsigned int bl1main()
     unsigned int nRUN_CHANGE = 0x1;
 
 #ifdef SOC_SIM
-    _dprintf("bl1 enter---\n");
+    _dprintf("bl1 enter---\r\n");
 #endif
 
 #if defined(MEMTEST) && defined(DEBUG)
@@ -82,7 +82,7 @@ long unsigned int bl1main()
                     nFBDIV = 0x800;
                     nGV = 0x12;
             }
-    
+#if 1 
             //1. OSCCLK_MUXSEL -> 0
             //   mmio_write_32((volatile unsigned int)(0x20010000), mmio_read_32((unsigned int*)(0x20010000)) & 0xFFFFFFF7);
             //2. FBDIV -> 8
@@ -93,7 +93,9 @@ long unsigned int bl1main()
             mmio_write_32((volatile unsigned int)(0x20010000), (mmio_read_32((unsigned int*)(0x20010000)) & 0xFFFFFFFD) | nDIRTYFLAG);
             //5. RUN_CHANGE -> 1
             mmio_write_32((volatile unsigned int)(0x20010000), (mmio_read_32((unsigned int*)(0x20010000)) & 0xFFFFFFFE) | nRUN_CHANGE);
-
+#else
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value, 1);
+#endif
 	    //200ms
 	    udelay(200000);
     }
@@ -176,6 +178,20 @@ long unsigned int bl1main()
 
 #ifdef DEBUG
     _dprintf("\r\n");
+
+    // clear mcause
+    _dprintf("mcause %d\r\n", read_csr(mcause));
+    write_csr(mcause, 0);
+    _dprintf("mcause %d\r\n", read_csr(mcause));
+
+    _dprintf("mscratch %d\r\n", read_csr(mscratch));
+    write_csr(mscratch, 0);
+    _dprintf("mscratch %d\r\n", read_csr(mscratch));
+
+    _dprintf("mip %d\r\n", read_csr(mip));
+    write_csr(mip, 0);
+    _dprintf("mip %d\r\n", read_csr(mip));
+
     _dprintf("DDR Clock Speed = %u\r\n", CLK_SPEED);    
     _dprintf("bl1 enter--- serial type 2\r\n");
     _dprintf("DDR_TIMING_0_TRAS      = 0x%08x\r\n",DDR_TIMING_0_TRAS     );
@@ -363,6 +379,18 @@ long unsigned int bl1main()
 
         /* volatile unsigned int* pCLINT1Reg = (unsigned int*)(0x02000004); */
         /* *pCLINT1Reg = 0x1; */
+
+        // clear mcause
+        _dprintf("mcause %d\r\n", read_csr(mcause));
+        write_csr(mcause, 0);
+        _dprintf("mcause %d\r\n", read_csr(mcause));
+
+        _dprintf("mscratch %d\r\n", read_csr(mscratch));
+        write_csr(mscratch, 0);
+        _dprintf("mscratch %d\r\n", read_csr(mscratch));
+
+        _dprintf("medeleg %d\r\n", read_csr(medeleg));
+        _dprintf("mideleg %d\r\n", read_csr(mideleg));
 
         _dprintf(">> Launch to 0x%x\r\n\r\n", (long unsigned int)BASEADDR_DRAM); //0x40006000);
 #endif
