@@ -289,6 +289,12 @@ unsigned long int bl1main()
     _dprintf("-----  NEXELL 2nd boot start ----\r\n");
     _dprintf("---------------------------------\r\n");
     _dprintf("---------------------------------\r\n");
+    nDDRC_init = nx_cpuif_reg_read_one(DDRC_REG_PHY_CONFIG, 0);
+    if ((nDDRC_init & DDR_PHY_CONFIG_SUCCESS) >> 5) {
+        _dprintf("==> Memory Auto-Calibration Success !! \r\n");
+    } else {
+	_dprintf("==> Memory Auto-Calibration Fail !!! \r\n");
+    }
     _dprintf(" please wait ...\r\n");
 #endif
 
