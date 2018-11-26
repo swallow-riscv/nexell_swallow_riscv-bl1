@@ -102,7 +102,7 @@ typedef struct __nx_cpuif_symbol_struct__ {
 #define DDRC_REG_100		(__nx_cpuif_symbol__){(unsigned int*)PHY_BASEADDR_DDRC0_MODULE, 0x100>>2, 0, 32 }
 
 #define DDR_ADDR_SIZE_COL_SIZE      (2 << 0)
-#define DDR_ADDR_SIZE_ROW_SIZE      (1 << 2)
+#define DDR_ADDR_SIZE_ROW_SIZE      (2 << 2)
 #define DDR_ADDR_SIZE_BANK_SIZE     (0 << 4)
 #define DDR_ADDR_SIZE_ADDR_MAP      (0 << 5)
 #define DDR_ADDR_SIZE_SEL_MDDR      (1 << 7)
