@@ -1444,12 +1444,26 @@ void NX_SDPADSetALT(unsigned int PortNum)
         struct nxpadi sdmmc0_gpio_4 = { 1, 4, 0, 1 };
         struct nxpadi sdmmc0_gpio_5 = { 1, 6, 0, 1 };
 
+        struct nxpadi sdmmc1_gpio_0 = { 1, 9, 0, 1 };
+        struct nxpadi sdmmc1_gpio_1 = { 1, 10, 0, 1 };
+        struct nxpadi sdmmc1_gpio_2 = { 1, 11, 0, 1 };
+        struct nxpadi sdmmc1_gpio_3 = { 1, 12, 0, 1 };
+        struct nxpadi sdmmc1_gpio_4 = { 1, 13, 0, 1 };
+        struct nxpadi sdmmc1_gpio_5 = { 1, 15, 0, 1 };
+
         setpad(sdmmc0_gpio_0, 1, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_1, 1, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_2, 1, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_3, 1, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_4, 1, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_5, 1, PHY_BASEADDR_GPIO0_MODULE);
+
+        setpad(sdmmc1_gpio_0, 1, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_1, 1, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_2, 1, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_3, 1, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_4, 1, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_5, 1, PHY_BASEADDR_GPIO0_MODULE);
 }
 
 void NX_SDPADSetGPIO(unsigned int PortNum)
@@ -1461,12 +1475,81 @@ void NX_SDPADSetGPIO(unsigned int PortNum)
         struct nxpadi sdmmc0_gpio_4 = { 1, 4, 0, 1 };
         struct nxpadi sdmmc0_gpio_5 = { 1, 6, 0, 1 };
 
+        struct nxpadi sdmmc1_gpio_0 = { 1, 9, 0, 1 };
+        struct nxpadi sdmmc1_gpio_1 = { 1, 10, 0, 1 };
+        struct nxpadi sdmmc1_gpio_2 = { 1, 11, 0, 1 };
+        struct nxpadi sdmmc1_gpio_3 = { 1, 12, 0, 1 };
+        struct nxpadi sdmmc1_gpio_4 = { 1, 13, 0, 1 };
+        struct nxpadi sdmmc1_gpio_5 = { 1, 15, 0, 1 };
+
         setpad(sdmmc0_gpio_0, 0, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_1, 0, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_2, 0, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_3, 0, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_4, 0, PHY_BASEADDR_GPIO0_MODULE);
         setpad(sdmmc0_gpio_5, 0, PHY_BASEADDR_GPIO0_MODULE);
+
+        setpad(sdmmc1_gpio_0, 0, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_1, 0, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_2, 0, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_3, 0, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_4, 0, PHY_BASEADDR_GPIO0_MODULE);
+        setpad(sdmmc1_gpio_5, 0, PHY_BASEADDR_GPIO0_MODULE);
+}
+
+void NX_SDMMC_SecondPortInit(void)
+{
+    NX_SDMMC_RegisterSet * const pSDXCReg = (NX_SDMMC_RegisterSet *)PHY_BASEADDR_SDMMC1_MODULE;
+
+    pSDXCReg->PWREN = 0 << 0;
+    pSDXCReg->CLKENA = NX_SDXC_CLKENA_LOWPWR;
+
+    pSDXCReg->TIEDRVPHASE = NX_SDMMC_CLOCK_SHIFT_180 << 8;
+    pSDXCReg->TIESMPPHASE = NX_SDMMC_CLOCK_SHIFT_0  << 8;
+
+    pSDXCReg->CLKSRC = 0;
+    pSDXCReg->CLKDIV = 0;
+
+    pSDXCReg->CTRL &= ~(NX_SDXC_CTRL_DMAMODE_EN | NX_SDXC_CTRL_READWAIT);
+    pSDXCReg->CTRL = NX_SDXC_CTRL_DMARST | NX_SDXC_CTRL_FIFORST | NX_SDXC_CTRL_CTRLRST;
+
+    while (pSDXCReg->CTRL & (NX_SDXC_CTRL_DMARST |
+                             NX_SDXC_CTRL_FIFORST |
+                             NX_SDXC_CTRL_CTRLRST))
+        pSDXCReg->CTRL;
+
+    pSDXCReg->PWREN = 0x1 << 0;
+    pSDXCReg->TMOUT = (0xFFFFFFU << 8) | (0x64 << 0);
+
+    pSDXCReg->CTYPE = 0;
+    pSDXCReg->BLKSIZ = BLOCK_LENGTH;
+
+    pSDXCReg->FIFOTH = ((8 - 1) << 16) | (8 << 0);
+
+    pSDXCReg->INTMASK = 0;
+    pSDXCReg->RINTSTS = 0xFFFFFFFF;
+
+    pSDXCReg->TIESRAM = 0x3;
+    pSDXCReg->TIEMODE = 1;
+}
+
+
+void NX_SDMMC_SecondPort_Terminate(void)
+{
+    register NX_SDMMC_RegisterSet * const pSDXCReg = (NX_SDMMC_RegisterSet *)PHY_BASEADDR_SDMMC1_MODULE;
+
+    pSDXCReg->RINTSTS = 0xFFFFFFFF;
+
+    pSDXCReg->CTRL = NX_SDXC_CTRL_DMARST |
+        NX_SDXC_CTRL_FIFORST |
+        NX_SDXC_CTRL_CTRLRST;
+
+    while (pSDXCReg->CTRL & (NX_SDXC_CTRL_DMARST |
+                             NX_SDXC_CTRL_FIFORST |
+                             NX_SDXC_CTRL_CTRLRST))
+        {
+            pSDXCReg->CTRL;
+        }
 }
 
 //------------------------------------------------------------------------------
@@ -1475,12 +1558,12 @@ unsigned int iSDBOOT(void)
     SDBOOTSTATUS SDXCBootStatus, *pSDXCBootStatus;
     int	result = 0;
 
-#ifdef DEBUG
+#ifdef DEBUG_SDBOOT
     _dprintf("[BL1-DEBUG] iSDBOOT start \r\n");
 #endif
     pSDXCBootStatus = &SDXCBootStatus;
 
-#ifdef DEBUG
+#ifdef DEBUG_SDBOOT
     _dprintf("[BL1-DEBUG] pSDXCBootStatus = 0x%08x \r\n",pSDXCBootStatus);
 #endif
     pSDXCBootStatus->SDPort = 0;
@@ -1488,13 +1571,20 @@ unsigned int iSDBOOT(void)
 
     NX_SDPADSetALT(pSDXCBootStatus->SDPort);
     NX_SDMMC_Init(pSDXCBootStatus);
-    
+
     result = SDMMCBOOT(pSDXCBootStatus);
     
     NX_SDMMC_Close(pSDXCBootStatus);
     NX_SDMMC_Terminate(pSDXCBootStatus);
 
+#ifndef QEMU_RISCV
+    //SDMMC port 1 init
+    NX_SDMMC_SecondPortInit();
+    //SDMMC port 1 terminate
+    NX_SDMMC_SecondPort_Terminate();
+#endif
+
     NX_SDPADSetGPIO(pSDXCBootStatus->SDPort);
-    
+
     return result;
 }
