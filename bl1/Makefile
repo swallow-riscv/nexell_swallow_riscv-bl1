@@ -71,6 +71,11 @@ ifeq ($(VECTOR_TEST),y)
 	CFLAGS			+=	-DVECTOR_TEST
 endif
 
+ifeq ($(CRYPTO_TEST),y)
+	CFLAGS			+=	-DCRYPTO_TEST
+	SYS_OBJS		+=	nx_crypto.o
+endif
+
 ifeq ($(DEBUG_SDBOOT),y)
 	CFLAGS			+=	-DDEBUG_SDBOOT
 endif

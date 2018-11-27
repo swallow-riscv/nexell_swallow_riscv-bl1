@@ -26,6 +26,7 @@ SIM                     = n
 
 MEMTEST                 = n
 VECTOR_TEST             = n
+CRYPTO_TEST		= n
 
 CROSS_TOOL_TOP		=
 ifeq ($(OS),Windows_NT)
