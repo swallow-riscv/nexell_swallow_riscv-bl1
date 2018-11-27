@@ -34,6 +34,10 @@
 #include <nx_gpio.h>
 #include <nx_chip_iomux.h>
 
+#ifdef CRYPTO_TEST
+#include <nx_crypto.h>
+#endif
+
 unsigned long int bl1main()
 {
     int result = 0;
@@ -313,6 +317,42 @@ unsigned long int bl1main()
 	return 0;
    }
 #endif //DEBUG && MEMTEST
+
+#ifdef CRYPTO_TEST
+   unsigned int iv[4] = {0x34333231, 0x38373635, 0x34333231, 0x38373635};
+   unsigned int key[4] = {0x34333231, 0x38373635, 0x34333231, 0x38373635};
+   unsigned int tori[4] = {0x31313131, 0x31313131, 0x32323232, 0x32323232};
+   unsigned int tenc[4];
+   unsigned int tdec[4];
+   int i;
+
+   _dprintf("CRYPTO test start\r\n");
+
+   _dprintf("tori");
+   for(i = 0;i < 4; i++)
+      _dprintf(" %x", tori[i]);
+   _dprintf("\r\n");
+
+   Encrypt(tori, tenc, iv, key, sizeof(tori));
+
+   _dprintf("tenc");
+   for(i = 0;i < 4; i++)
+      _dprintf(" %x", tenc[i]);
+   _dprintf("\r\n");
+
+   _dprintf("\r\n");
+   _dprintf("\r\n");
+
+   Decrypt(tenc, tdec, iv, key, sizeof(tenc));
+
+   _dprintf("tdec");
+   for(i = 0;i < 4; i++)
+      _dprintf(" %x", tdec[i]);
+   _dprintf("\r\n");
+
+   _dprintf("CRYPTO test end\r\n");
+   while(1);
+#endif
 
    //Boot mode check and BBL+linux loading
    result = iSDBOOT();

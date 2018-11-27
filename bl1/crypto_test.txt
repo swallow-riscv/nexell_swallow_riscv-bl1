@@ -1,0 +1,52 @@
+
+=============================
+Data format
+all of them is 4byte bigendian format.
+
+LE (4byte * 2)
+1234 5678
+0x31323334 0x35363738
+
+BE (4byte * 2)
+4321 8765
+0x34333231 0x38373635
+=============================
+
+
+=============================
+test on PC
+echo "1111111122222222" | openssl enc -aes-128-ecb -e -K "34333231383736353433323138373635" | xxd -g 4
+
+enc
+openssl enc -aes-128-ecb -e -K "34333231383736353433323138373635" -in tori.txt -out tori.enc
+
+xxd -g 4 tori.enc
+00000000: 2f69d0ff b90896b8 572265d1 0d42db7e  /i......W"e..B.~
+00000010: 6359e2e9 0ef7fa78 8a543323 90fb5a11  cY.....x.T3#..Z.
+
+dec
+openssl enc -aes-128-ecb -d -K "34333231383736353433323138373635" -in tori.enc -out tori.dec
+
+xxd -g 4 tori.dec
+00000000: 31313131 31313131 32323232 32323232  1111111122222222
+=============================
+
+
+=============================
+on cpu mode
+
+()aes
+- ecb : ok
+- cbc : needs s/w logic on description
+- ctr : set encode mode (both of enc/dec)
+
+()des
+- ecb : ok
+- cbc : needs s/w logic on description ?
+
+()3des
+need to check
+
+()hash
+not support
+=============================
