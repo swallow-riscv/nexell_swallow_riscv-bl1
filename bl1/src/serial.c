@@ -37,25 +37,11 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int typ
 
 	/* step xx. calculates an integer at the baud rate */
 	//ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
-        if (type == 200) //200Mhz
-                ibrd = 108;					// ibrd = 8, 115200bps
-        else if (type == 100) //100Mhz
-	        ibrd = 54;
-        else if (type == 50) //50Mhz
-	        ibrd = 27;
-        else //150Mhz
-	        ibrd = 81;
+        ibrd = 108;					// ibrd = 8, 115200bps
 
 	/* step xx. calculates an fractional at the baud rate */
 	//fbrd = ((uclk % ((((baud_rate/1) * 16) + 32) * 64)) / (baud_rate / 1) * 16);		// fbrd = 0,
-        if (type == 200) //200MHz
-	        fbrd = 8;
-        else if (type == 100) //100MHz
-	        fbrd = 3;
-        else if (type == 50) //50MHz
-	        fbrd = 5;
-        else //150Mhz
-        	fbrd = 4;
+        fbrd = 8;
 
         //mmio_write_32((base + DLH), ((ibrd >> 8) & 0xFF));			// Divider Latch High 8bit
 	mmio_write_32((base + DLL), ((ibrd >> 0) & 0xFF));			// Divider Latch Low 8bit
