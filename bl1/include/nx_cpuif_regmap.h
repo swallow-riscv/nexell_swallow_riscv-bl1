@@ -142,7 +142,7 @@ typedef struct __nx_cpuif_symbol_struct__ {
 #define CLK_100MHZ     (100)
 #define CLK_50MHZ      (50)
 
-#define CLK_SPEED      CLK_200MHZ
+#define CLK_SPEED      CLK_100MHZ
 #define CL_3
 //#define CL_2
 
