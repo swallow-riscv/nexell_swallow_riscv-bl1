@@ -137,10 +137,10 @@ typedef struct __nx_cpuif_symbol_struct__ {
 //-----------------------------------------
 //---------------- TIMING -----------------
 //-----------------------------------------
-#define CLK_200MHZ     (200)
-#define CLK_166MHZ     (150)
-#define CLK_100MHZ     (100)
-#define CLK_50MHZ      (50)
+#define CLK_200MHZ     (200) //success
+#define CLK_166MHZ     (150) //fail
+#define CLK_100MHZ     (100) //success
+#define CLK_50MHZ      (50)  //success. but need more test
 
 #define CLK_SPEED      CLK_100MHZ
 #define CL_3

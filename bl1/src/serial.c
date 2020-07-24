@@ -19,7 +19,9 @@
 #include <nx_chip_iomux.h>
 #include <nx_swallow_platform.h>
 
-#define CONFIG_DEFAULT_REQ_UART_SRC_FREQ	(200000000)
+#define CONFIG_REQ_UART_SRC_FREQ_200MHZ		(200000000)			//CLK_SPEED 200Mhz/100Mhz
+#define CONFIG_REQ_UART_SRC_FREQ_150MHZ		(150000000) 			//CLK_SPEED 150Mhz
+#define CONFIG_REQ_UART_SRC_FREQ_100MHZ		(100000000) 			//CLK_SPEED 50Mhz
 #define CONFIG_REQ_UCLK_FREQ			(100000000)			// 100Mhz
 #define CONFIG_SERIAL_BAUDRATE			(115200)
 
@@ -37,7 +39,12 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int typ
 
 	/* step xx. calculates an integer at the baud rate */
 	//ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
-        ibrd = 108;					// ibrd = 8, 115200bps
+	if (type == 200 | type == 100)
+		ibrd = 108;							// ibrd = 8, 115200bps, AXI 200Mhz
+	else if (type == 150)
+		ibrd = 81;							// ibrd = 8, 115200bps, AXI 150Mhz
+	else //50Mhz
+		ibrd = 54;							// ibrd = 8, 115200bps, AXI 100Mhz
 
 	/* step xx. calculates an fractional at the baud rate */
 	//fbrd = ((uclk % ((((baud_rate/1) * 16) + 32) * 64)) / (baud_rate / 1) * 16);		// fbrd = 0,
@@ -68,7 +75,12 @@ int serial_init(unsigned int channel, unsigned int type)
         //	set_uclk_enb(TRUE);
 
 	/* step xx. calculates an integer at the baud rate */
-	serial_set_baudrate(channel, CONFIG_DEFAULT_REQ_UART_SRC_FREQ, CONFIG_SERIAL_BAUDRATE, type);
+	if (type == 200 | type == 100)
+		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_200MHZ, CONFIG_SERIAL_BAUDRATE, type);
+	else if (type == 150)
+		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_150MHZ, CONFIG_SERIAL_BAUDRATE, type);
+	else
+		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_100MHZ, CONFIG_SERIAL_BAUDRATE, type);
 
 	/* step xx. change the (tx, rx)gpio-alternative function */
 	//setpad(g_uart_pad[channel][0].padi, 1);
