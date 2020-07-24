@@ -109,6 +109,23 @@ unsigned long int bl1main()
             //5. RUN_CHANGE -> 1
             mmio_write_32((volatile unsigned int)(0x20010000), (mmio_read_32((unsigned int*)(0x20010000)) & 0xFFFFFFFE) | nRUN_CHANGE);
 
+            if (CLK_SPEED == 150) {
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 0); // div 1
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 1); // div 2
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 2); // div 3
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 2); // div 3
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 5); // div 6
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 6); // div 7
+            }
+            else if (CLK_SPEED == 50) {
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 0); // div 1
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 0); // div 1
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 0); // div 1
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 0); // div 1
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 1); // div 2
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 1); // div 2
+            }
+
 	    //20ms
 	    udelay(20000);
     }
