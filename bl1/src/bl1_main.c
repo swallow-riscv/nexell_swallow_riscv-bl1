@@ -55,6 +55,8 @@ unsigned long int bl1main()
     unsigned int nGV = 0;
     unsigned int nDIRTYFLAG = 0x2;
     unsigned int nRUN_CHANGE = 0x1;
+    unsigned int nFBDIV_cpu = 0;
+    unsigned int nGV_cpu = 0;
 
 #ifdef SOC_SIM
     _dprintf("bl1 enter SOC simulation mode\n");
@@ -71,12 +73,12 @@ unsigned long int bl1main()
 	    ; //nothing
     }
     else if (CLK_SPEED == 100) {
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 1); // div 2
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 0); // div 1
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 1); // div 2
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 0); // div 1
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 3); // div 4
-            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 4); // div 5
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 1); // div 2 200Mhz
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 0); // div 1 200Mhz
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 1); // div 2 100Mhz
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 0); // div 1 200Mhz
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 3); // div 4 50Mhz
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 4); // div 5 40Mhz
        	    //20ms
 	    udelay(20000);
     }
@@ -85,9 +87,17 @@ unsigned long int bl1main()
             __asm__ volatile ("nop");
             __asm__ volatile ("nop");
 
+            if (CLK_SPEED == 166) { //166MHZ
+                    nFBDIV = 0x2800;
+                    nGV = 0xf;
+            }
             if (CLK_SPEED == 150) { //150MHZ
                     nFBDIV = 0xC00;
                     nGV = 0x2;
+            }
+            if (CLK_SPEED == 133) { //133MHZ
+                    nFBDIV = 0x2000;
+                    nGV = 0x8;
             }
             /* else if (CLK_SPEED == 100) { */
             /*         nFBDIV = 0x800; */
@@ -109,13 +119,29 @@ unsigned long int bl1main()
             //5. RUN_CHANGE -> 1
             mmio_write_32((volatile unsigned int)(0x20010000), (mmio_read_32((unsigned int*)(0x20010000)) & 0xFFFFFFFE) | nRUN_CHANGE);
 
+            if (CLK_SPEED == 166) {
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 2); // div 3 333Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 1); // div 2 166Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 2); // div 3 111Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 1); // div 2 166Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 5); // div 6 55.5Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 7); // div 8 41.625Mhz
+            }
             if (CLK_SPEED == 150) {
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 0); // div 1
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 1); // div 2
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 2); // div 3
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 2); // div 3
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 5); // div 6
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 6); // div 7
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 0); // div 1 300Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 1); // div 2 150Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 2); // div 3 100Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 1); // div 2 150Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 5); // div 6 50Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 6); // div 7 42.8Mhz
+            }
+            else if (CLK_SPEED == 133) {
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 2); // div 3 266Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 0); // div 1 266Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 0); // div 1 266Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 0); // div 1 266Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 4); // div 5 53.2Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 6); // div 7 38Mhz
             }
             else if (CLK_SPEED == 50) {
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 0); // div 1
@@ -125,6 +151,23 @@ unsigned long int bl1main()
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 1); // div 2
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 1); // div 2
             }
+
+            // cpu 200 -> 300Mhz
+            nFBDIV_cpu = 0xC00;
+            nGV_cpu = 0x2;
+
+            //1. OSCCLK_MUXSEL -> 0
+            //   mmio_write_32((volatile unsigned int)(0x20020000), mmio_read_32((unsigned int*)(0x20020000)) & 0xFFFFFFF7);
+            //2. FBDIV -> 8
+            mmio_write_32((volatile unsigned int)(0x20020030), (mmio_read_32((unsigned int*)(0x20020030)) & 0xFFFF00FF) | nFBDIV_cpu);
+            //3. GV -> 2
+            mmio_write_32((volatile unsigned int)(0x20020030), (mmio_read_32((unsigned int*)(0x20020030)) & 0xFFFFFFF0) | nGV_cpu);
+            //4. DIRTYFLAG -> 1
+            mmio_write_32((volatile unsigned int)(0x20020000), (mmio_read_32((unsigned int*)(0x20020000)) & 0xFFFFFFFD) | nDIRTYFLAG);
+            //5. RUN_CHANGE -> 1
+            mmio_write_32((volatile unsigned int)(0x20020000), (mmio_read_32((unsigned int*)(0x20020000)) & 0xFFFFFFFE) | nRUN_CHANGE);
+
+            nx_cpuif_reg_write_one(CMU_INFO_DEF__CPU_0___CORE__dynamic_divider_value	, 0); // div 1 300Mhz
 
 	    //20ms
 	    udelay(20000);

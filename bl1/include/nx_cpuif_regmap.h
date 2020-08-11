@@ -101,15 +101,15 @@ typedef struct __nx_cpuif_symbol_struct__ {
 #define DDRC_REG_FC		(__nx_cpuif_symbol__){(unsigned int*)PHY_BASEADDR_DDRC0_MODULE, 0xFC>>2, 0, 32 }
 #define DDRC_REG_100		(__nx_cpuif_symbol__){(unsigned int*)PHY_BASEADDR_DDRC0_MODULE, 0x100>>2, 0, 32 }
 
-#define DDR_ADDR_SIZE_COL_SIZE      (2 << 0)
-#define DDR_ADDR_SIZE_ROW_SIZE      (2 << 2)
-#define DDR_ADDR_SIZE_BANK_SIZE     (0 << 4)
-#define DDR_ADDR_SIZE_ADDR_MAP      (0 << 5)
-#define DDR_ADDR_SIZE_SEL_MDDR      (1 << 7)
-#define DDR_ADDR_SIZE_IO_STRENGTH   (1 << 8) //0
-#define DDR_ADDR_SIZE_IO_DRIVESEL   (1 << 10)
-#define DDR_ADDR_SIZE_IO_ODTSEL     (1 << 11)
-#define DDR_ADDR_SIZE_IO_ODTEN      (1 << 12)
+#define DDR_ADDR_SIZE_COL_SIZE      (2 << 0) // a[0]-a[9]  10bit
+#define DDR_ADDR_SIZE_ROW_SIZE      (2 << 2) // a[0]-a[13] 14bit
+#define DDR_ADDR_SIZE_BANK_SIZE     (2 << 4) // 4bank
+#define DDR_ADDR_SIZE_ADDR_MAP      (0 << 5) // bank-row-col
+#define DDR_ADDR_SIZE_SEL_MDDR      (1 << 7) // ddr timing
+#define DDR_ADDR_SIZE_IO_STRENGTH   (1 << 8) // quarter drive
+#define DDR_ADDR_SIZE_IO_DRIVESEL   (1 << 10)// full drive
+#define DDR_ADDR_SIZE_IO_ODTSEL     (1 << 11)// 50 ohm
+#define DDR_ADDR_SIZE_IO_ODTEN      (1 << 12)// 50 ohm
 
 #define DDR_PHY_CONFIG_START        (1 << 0)
 #define DDR_PHY_CONFIG_CLEAR        (1 << 1)
@@ -138,11 +138,13 @@ typedef struct __nx_cpuif_symbol_struct__ {
 //---------------- TIMING -----------------
 //-----------------------------------------
 #define CLK_200MHZ     (200) //success
-#define CLK_166MHZ     (150) //fail
+#define CLK_166MHZ     (166) //fail
+#define CLK_150MHZ     (150) //success. but need more test
+#define CLK_133MHZ     (133) //success
 #define CLK_100MHZ     (100) //success
 #define CLK_50MHZ      (50)  //success. but need more test
 
-#define CLK_SPEED      CLK_100MHZ
+#define CLK_SPEED      CLK_133MHZ
 #define CL_3
 //#define CL_2
 
@@ -164,6 +166,63 @@ typedef struct __nx_cpuif_symbol_struct__ {
 #define TDQSS          (1*TCK) //0.75 tCK
 #define TREFR          (7.8 * 1000) //ns
 #define INIT_TIME      (200 * 1000) //ns
+#define EXTRA_FACTOR   0
+#elif CLK_SPEED == CLK_166MHZ //-6 degree
+#ifdef CL_3
+#define TCK            6
+#else //CL_2
+#define TCK            12
+#endif
+#define TRAS           (42) //ns
+#define TRFC           (72) //ns
+#define TRP            (18) //ns
+#define TRC            (60) //ns
+#define TRCD	       (18) //ns
+#define TRRD           (12) //ns
+#define TWR            (15) //ns
+#define TWTR           (1*TCK)
+#define TMRD           (2*TCK)
+#define TDQSS          (1*TCK) //0.75 tCK
+#define TREFR          (7.8 * 1000) //ns 7.8us
+#define INIT_TIME      (200 * 1000) //ns 200us
+#define EXTRA_FACTOR   0
+#elif CLK_SPEED == CLK_150MHZ //-7 degree
+#ifdef CL_3
+#define TCK            7
+#else //CL_2
+#define TCK            12
+#endif
+#define TRAS           (43) //ns
+#define TRFC           (72) //ns
+#define TRP            (20) //ns
+#define TRC            (64) //ns
+#define TRCD	       (20) //ns
+#define TRRD           (13) //ns
+#define TWR            (15) //ns
+#define TWTR           (1*TCK)
+#define TMRD           (2*TCK)
+#define TDQSS          (1*TCK) //0.75 tCK
+#define TREFR          (7.8 * 1000) //ns 7.8us
+#define INIT_TIME      (200 * 1000) //ns 200us
+#define EXTRA_FACTOR   0
+#elif CLK_SPEED == CLK_133MHZ //-75 degree
+#ifdef CL_3
+#define TCK            8
+#else //CL_2
+#define TCK            12
+#endif
+#define TRAS           (45) //ns
+#define TRFC           (72) //ns
+#define TRP            (23) //ns
+#define TRC            (68) //ns
+#define TRCD	       (23) //ns
+#define TRRD           (15) //ns
+#define TWR            (15) //ns
+#define TWTR           (1*TCK)
+#define TMRD           (2*TCK)
+#define TDQSS          (1*TCK) //0.75 tCK
+#define TREFR          (7.8 * 1000) //ns 7.8us
+#define INIT_TIME      (200 * 1000) //ns 200us
 #define EXTRA_FACTOR   0
 #else // !200MHZ  -6 degree
 #ifdef CL_3
