@@ -20,7 +20,9 @@
 #include <nx_swallow_platform.h>
 
 #define CONFIG_REQ_UART_SRC_FREQ_200MHZ		(200000000)			//CLK_SPEED 200Mhz/100Mhz
+#define CONFIG_REQ_UART_SRC_FREQ_166MHZ		(166000000) 			//CLK_SPEED 166Mhz
 #define CONFIG_REQ_UART_SRC_FREQ_150MHZ		(150000000) 			//CLK_SPEED 150Mhz
+#define CONFIG_REQ_UART_SRC_FREQ_133MHZ		(266000000) 			//CLK_SPEED 133Mhz
 #define CONFIG_REQ_UART_SRC_FREQ_100MHZ		(100000000) 			//CLK_SPEED 50Mhz
 #define CONFIG_REQ_UCLK_FREQ			(100000000)			// 100Mhz
 #define CONFIG_SERIAL_BAUDRATE			(115200)
@@ -41,8 +43,12 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int typ
 	//ibrd = (uclk / ((baud_rate/1) * 16));					// ibrd = 8, 115200bps
 	if (type == 200 | type == 100)
 		ibrd = 108;							// ibrd = 8, 115200bps, AXI 200Mhz
+	else if (type == 166)
+		ibrd = 90;							// ibrd = 8, 115200bps, AXI 166Mhz
 	else if (type == 150)
 		ibrd = 81;							// ibrd = 8, 115200bps, AXI 150Mhz
+	else if (type == 133)
+		ibrd = 144;							// ibrd = 8, 115200bps, AXI 133Mhz
 	else //50Mhz
 		ibrd = 54;							// ibrd = 8, 115200bps, AXI 100Mhz
 
@@ -50,7 +56,7 @@ void serial_set_baudrate (int channel, int uclk, int baud_rate, unsigned int typ
 	//fbrd = ((uclk % ((((baud_rate/1) * 16) + 32) * 64)) / (baud_rate / 1) * 16);		// fbrd = 0,
         fbrd = 8;
 
-        //mmio_write_32((base + DLH), ((ibrd >> 8) & 0xFF));			// Divider Latch High 8bit
+        mmio_write_32((base + DLH), ((ibrd >> 8) & 0xFF));			// Divider Latch High 8bit
 	mmio_write_32((base + DLL), ((ibrd >> 0) & 0xFF));			// Divider Latch Low 8bit
 
 	// DLF - After confirming the number of bits in the field, write it down.
@@ -77,8 +83,12 @@ int serial_init(unsigned int channel, unsigned int type)
 	/* step xx. calculates an integer at the baud rate */
 	if (type == 200 | type == 100)
 		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_200MHZ, CONFIG_SERIAL_BAUDRATE, type);
+	else if (type == 166)
+		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_166MHZ, CONFIG_SERIAL_BAUDRATE, type);
 	else if (type == 150)
 		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_150MHZ, CONFIG_SERIAL_BAUDRATE, type);
+	else if (type == 133)
+		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_133MHZ, CONFIG_SERIAL_BAUDRATE, type);
 	else
 		serial_set_baudrate(channel, CONFIG_REQ_UART_SRC_FREQ_100MHZ, CONFIG_SERIAL_BAUDRATE, type);
 
