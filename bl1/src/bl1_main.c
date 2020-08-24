@@ -138,8 +138,8 @@ unsigned long int bl1main()
             else if (CLK_SPEED == 133) {
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK400__dynamic_divider_value	, 2); // div 3 266Mhz
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___AXI__dynamic_divider_value	, 0); // div 1 266Mhz
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 1); // div 1 133Mhz
-                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 0); // div 1 266Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___APB__dynamic_divider_value	, 1); // div 2 133Mhz
+                    nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK133__dynamic_divider_value	, 1); // div 2 133Mhz
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK50__dynamic_divider_value	, 4); // div 5 53.2Mhz
                     nx_cpuif_reg_write_one(CMU_INFO_DEF__SYS_0___CLK40__dynamic_divider_value	, 6); // div 7 38Mhz
             }
